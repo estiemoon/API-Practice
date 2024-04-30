@@ -2,10 +2,10 @@
 
 const express = require('express')
 const app = express()
-app.listen(2345)
+app.listen(1234)
 
 //<DB세팅
-db = new Map()
+var db = new Map()
 
 let book1 = {
     title : "모순",
@@ -60,9 +60,17 @@ app.get('/bestsellers',(req,res)=>{
 app.get('/bestsellers/:id', (req,res)=>{
     let {id} = req.params
     id = parseInt(id)
-    book = db.get(id)
+    let book = db.get(id)
+
+    if (book == undefined){
+        msg = '그런 책은 존재하지 않습니다'
+    } else {
+        msg = `${id}위 책은 ${book.date}에 출간된 ${book.author}의 ${book.title}입니다. 가격은 ${book.price}원 입니다.`
+    }
     
-    res.send(`${id}위 책은 ${book.date}에 출간된 ${book.author}의 ${book.title}입니다. 가격은 ${book.price}입니다.`)
+    res.json({
+        message : msg
+    })
     
 })
 //GET>
@@ -81,3 +89,64 @@ app.post('/bestsellers', (req,res)=>{
 })
 
 //POST>
+
+//<DELETE 개별 책 삭제하기
+app.delete('/bestsellers/:id', (req,res)=>{
+    let {id} = req.params
+    id = parseInt(id)
+    var msg = ''
+
+    const book = db.get(id)
+
+    if (book == undefined) {
+        msg = `${id}번이 존재하지 않습니다.`
+    } else {
+        const title = book.title
+        db.delete(id)
+        msg = `${title}이 삭제되었습니다.`
+    }
+
+    res.json({
+        message : msg
+    })
+
+})//DELETE>
+
+//<DELETE 전체 책 삭제하기
+app.delete('/bestsellers', (req,res)=>{
+    if (db.size > 0){
+        db.clear()
+        msg = `전체 책이 삭제되었습니다.`
+    } else {
+        msg = `책장이 비었습니다.`
+    }
+
+    res.json({
+        message : msg
+    })
+})
+//DELETE>
+
+//<PUT 책 가격 수정하기
+app.put('/bestsellers/:id', (req,res)=>{
+    let {id} = req.params
+    id = parseInt(id)
+    const book = db.get(id)
+
+
+    if (book == undefined){
+        msg = '그런 책은 존재하지 않습니다.'
+    } else {
+        const oldPrice = book.price //밖으로 빼면 에러
+        const newPrice = req.body.price
+        book.price = newPrice
+
+        msg =  `${book.author}의 ${book.title}이 ${oldPrice}원에서 ${book.price}원으로 가격이 인하되었습니다!!`
+    }
+
+    res.json({
+        message: msg
+    })
+
+})
+//PUT>
