@@ -1,8 +1,12 @@
-const express = require('express')
-const router = express.Router()
-const conn = require('../mariadb')
+const express = require('express');
+const conn = require('../mariadb');
+const jwt = require('jsonwebtoken');
+const dotenv = require('dotenv');
+const cookieParser = require('cookie-parser');
 
-router.use(express.json())
+dotenv.config();
+const router = express.Router();
+router.use(express.json());
 
 //회원가입
 router.post('/join' , (req,res) => {
@@ -35,8 +39,17 @@ router.get('/login', (req,res) => {
 
     conn.query(sql,values, 
         function(err,results) {
+        console.log(results)
         loginUser = results[0]       
         if (loginUser && loginUser.password == password){
+
+            const token = jwt.sign({email : loginUser.name, name : loginUser.name},
+                 process.env.PRIVATE_KEY,
+                 {expiresIn : "2 days",
+                    issuer : "moon"
+                 })
+            res.cookie('token', token, {httponly:true})
+
             res.status(200).json({
                 message : `${loginUser.name}님 로그인 되셨습니다.`
             })
