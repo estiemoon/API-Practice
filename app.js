@@ -8,3 +8,7 @@ const bookRouter = require('./route/books')
 
 app.use("/",userRouter)
 app.use("/",bookRouter)
+
+app.get('/', (req, res) => {
+    res.send('Hello World!')
+});
