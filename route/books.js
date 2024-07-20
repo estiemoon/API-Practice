@@ -52,8 +52,11 @@ router.get('/books/:id', (req,res)=>{
 
     conn.query(sql,values, 
         function(err,results) {
-        curBook = results[0]       
+    
+
+        res.json(results)
         
+
         if(curBook){
             res.status(200).json({
                 message : `제목 : ${curBook.name} 작가: ${curBook.author} 가격 : ${curBook.price}`
